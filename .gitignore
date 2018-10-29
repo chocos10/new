@@ -1,0 +1,10 @@
+#client_secret
+client_secret.json
+
+flask/
+
+# .env
+*.env
+
+#VSCode
+.vscode/

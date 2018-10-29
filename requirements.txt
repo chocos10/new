@@ -1,0 +1,12 @@
+google-api-python-client
+google-auth 
+google-auth-oauthlib 
+google-auth-httplib2
+Flask==1.0.2
+Flask-OAuthlib==0.9.5
+WTForms==2.2.1
+Werkzeug==0.14.1
+pytz==2018.4
+simplejson==3.16.0
+Flask-Login
+Flask-SQLAlchemy

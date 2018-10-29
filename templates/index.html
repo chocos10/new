@@ -1,0 +1,53 @@
+<!Doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="font-awesome/css/font-awesome.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>    
+  </head>
+  <body>
+      <header>
+        <div class="container">
+            <div id="nav_head">
+              <h1> Take a TEST!!</h1>
+            </div>
+
+            <nav>
+              <ul>
+                  
+                  <li class="current"><a href="{{ url_for('index')}}">HOME</a></li>
+                  <li><a href="">Logout</a></li>
+                  
+                  <li><a href="">Login</a></li>
+                  
+
+              </ul>
+            </nav>
+        </div>
+      </header>
+      <div class="container">
+        
+        <input type="text" placeholder="Search..">
+        <button> search </button>
+      </div>
+      <div class="container" style="min-height:100% width:80%">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-warning alert-dismissiblr" role="alert">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span></button>
+                {{message}}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+      </div>
+
+      {% block content %}{% endblock %}
+      
+  </body>
+</html>
