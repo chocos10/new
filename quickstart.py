@@ -28,104 +28,104 @@ app.secret_key = 'secret key'
 @app.route('/')
 def index():
   
-  return flask.redirect(flask.url_for('home'))
+	return flask.redirect(flask.url_for('home'))
 
 @app.route('/home')
 def home():
 
-  return render_template("index.html")
+	return render_template("index.html")
 
 @app.route('/search')
 def search():
-  if 'credentials' not in flask.session:
-    return flask.redirect('authorize')
+	if 'credentials' not in flask.session:
+		return flask.redirect('authorize')
 
   # Load the credentials from the session.
-  credentials = google.oauth2.credentials.Credentials(
-      **flask.session['credentials'])
+	credentials = google.oauth2.credentials.Credentials(
+		  **flask.session['credentials'])
 
-  client = googleapiclient.discovery.build(
-      API_SERVICE_NAME, API_VERSION, credentials=credentials)  
+	client = googleapiclient.discovery.build(
+		API_SERVICE_NAME, API_VERSION, credentials=credentials)  
 
-  return search_list_by_keyword(client,
-    part='snippet',
-    maxResults=25,
-    q='dogs',
-    type='')
+	return search_list_by_keyword(client,
+		part='snippet',
+    	maxResults=25,
+    	q='dogs',
+    	type='')
 
 
 @app.route('/authorize')
 def authorize():
   # Create a flow instance to manage the OAuth 2.0 Authorization Grant Flow
   # steps.
-  flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-      CLIENT_SECRETS_FILE, scopes=SCOPES)
+	flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+		CLIENT_SECRETS_FILE, scopes=SCOPES)
 
-  flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
-  authorization_url, state = flow.authorization_url(
+	flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+	authorization_url, state = flow.authorization_url(
       # This parameter enables offline access which gives your application
       # both an access and refresh token.
-      access_type='offline',
+		access_type='offline',
       # This parameter enables incremental auth.
-      include_granted_scopes='true')
+		include_granted_scopes='true')
 
   # Store the state in the session so that the callback can verify that
   # the authorization server response.
-  flask.session['state'] = state
+	flask.session['state'] = state
 
-  return flask.redirect(authorization_url)
+	return flask.redirect(authorization_url)
 
 
 @app.route('/oauth2callback')
 def oauth2callback():
   # Specify the state when creating the flow in the callback so that it can
   # verify the authorization server response.
-  state = flask.session['state']
-  flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+	state = flask.session['state']
+	flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
       CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
-  flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+	flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
 
   # Use the authorization server's response to fetch the OAuth 2.0 tokens.
-  authorization_response = flask.request.url
-  flow.fetch_token(authorization_response=authorization_response)
+	authorization_response = flask.request.url
+	flow.fetch_token(authorization_response=authorization_response)
 
   # Store the credentials in the session.
   # ACTION ITEM for developers:
   #     Store user's access and refresh tokens in your data store if
   #     incorporating this code into your real app.
-  credentials = flow.credentials
-  flask.session['credentials'] = {
-      'token': credentials.token,
-      'refresh_token': credentials.refresh_token,
-      'token_uri': credentials.token_uri,
-      'client_id': credentials.client_id,
-      'client_secret': credentials.client_secret,
-      'scopes': credentials.scopes
-  }
+	credentials = flow.credentials
+	flask.session['credentials'] = {
+    	'token': credentials.token,
+      	'refresh_token': credentials.refresh_token,
+      	'token_uri': credentials.token_uri,
+      	'client_id': credentials.client_id,
+      	'client_secret': credentials.client_secret,
+      	'scopes': credentials.scopes
+  	}
 
-  return flask.redirect(flask.url_for('index'))
+  	return flask.redirect(flask.url_for('index'))
 
 def channels_list_by_username(client, **kwargs):
-  response = client.channels().list(
-    **kwargs
-  ).execute()
+  	response = client.channels().list(
+    	**kwargs
+  	).execute()
 
-  return flask.jsonify(**response)
+  	return flask.jsonify(**response)
 
 def print_response(response):
-  print(response)
+  	print(response)
 
 def search_list_by_keyword(client, **kwargs):
   # See full sample for function
   # print (flask.session['credentials']['client_id'])
-  response = client.search().list(
-    **kwargs
-  ).execute()
-  print ( response['items'])
-  return flask.jsonify(**response)
+  	response = client.search().list(
+    	**kwargs
+  	).execute()
+  	print ( response['items'])
+  	return flask.jsonify(**response)
 
 if __name__ == '__main__':
   # When running locally, disable OAuthlib's HTTPs verification. When
   # running in production *do not* leave this option enabled.
-  os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-  app.run(host='0.0.0.0', port=5000, debug=True)
+	os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+  	app.run(host='0.0.0.0', port=5000, debug=True)
