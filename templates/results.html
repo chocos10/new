@@ -1,0 +1,9 @@
+{% extends "header.html" %}
+{% block content%}
+
+  {% for i in range(0,length) %}
+  <iframe width="560" height="auto" src="https://www.youtube.com/embed/" + {{ response['items'][i]['id']['videoId'] }} frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  {% endfor %}
+
+
+{%endblock%}
