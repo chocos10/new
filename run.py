@@ -43,11 +43,6 @@ def login():
 
 
 @app.route("/")
-def index():
-    return flask.render_template("header.html")
-
-
-@app.route("/home")
 def home():
     return flask.redirect(flask.url_for("search"))
 
