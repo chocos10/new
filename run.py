@@ -48,7 +48,6 @@ def home():
 
 
 @app.route("/search", methods=["POST", "GET"])
-@login_required
 def search():
     if flask.request.method == "POST":
         flask.session["querry"] = flask.request.form["querry"]
@@ -123,7 +122,7 @@ def oauth2callback():
 def logout():
     flask.session.clear()
     flask.flash("You are logged out, login to use the application")
-    return flask.redirect(flask.url_for("index"))
+    return flask.redirect(flask.url_for("home"))
 
 
 """ Utility methods used by the application views """

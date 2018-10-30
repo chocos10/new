@@ -7,16 +7,12 @@
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
-
-    <link rel="stylesheet" type="text/css" href="font-awesome/css/font-awesome.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>    
   </head>
   <body>
       <header>
         <nav>
           <div class="nav-wrapper">
-            <a href="#" class="brand-logo">Logo</a>
+            <a href="#" class="brand-logo"></a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
               <li class="current"><a href="{{ url_for('home')}}">HOME</a></li>
               {% if session.logged_in %}
@@ -29,6 +25,7 @@
           </div>
         </nav>
       </header>
+
     {% block content %}{% endblock %}
 
   </body>
