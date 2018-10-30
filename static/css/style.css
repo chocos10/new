@@ -1,0 +1,12 @@
+body{
+    margin: auto;
+    padding: 0%;
+}
+
+.result{
+    text-align: center;
+}
+
+iframe {
+    padding: 10px;
+}
