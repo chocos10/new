@@ -5,9 +5,8 @@ import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 from flask import render_template
-from flask import Blueprint, request, url_for, redirect, session
-from flask_login import LoginManager, login_required, login_user, \
-    logout_user, current_user
+from flask import request, url_for, redirect, session
+
 
 # The CLIENT_SECRETS_FILE variable specifies the name of a file that contains
 # the OAuth 2.0 information for this application, including its client_id and
@@ -25,34 +24,30 @@ app = flask.Flask(__name__)
 # use this code in your application please replace this with a truly secret
 # key. See http://flask.pocoo.org/docs/0.12/quickstart/#sessions.
 app.secret_key = 'secret key'
-login_manager = LoginManager(app)
-login_manager.login_view = "login"
 
-
-@app.route('/')
+@app.route('/login')
 def login():  
 	return flask.redirect(flask.url_for('authorize'))
 
+@app.route('/')
+def index():  
+	return render_template("header.html")
 
 @app.route('/home')
 def home():
-
 	return flask.redirect(flask.url_for('search'))
 
-
 @app.route('/search',methods=['POST','GET'])
-def search():
- 
+def search(): 
 	if request.method == "POST":
 		session['querry'] = request.form['querry']
 		return flask.redirect(flask.url_for('result'))
-
 	return render_template("index.html")
 
 @app.route('/result')
 def result():
 	if 'credentials' not in flask.session:
-		return flask.redirect('login')
+      		return flask.redirect('authorize')
 
   	# Load the credentials from the session.
 	credentials = google.oauth2.credentials.Credentials(
@@ -91,7 +86,6 @@ def authorize():
 	flask.session['state'] = state
 	return flask.redirect(authorization_url)
 
-
 @app.route('/oauth2callback')
 def oauth2callback():
   # Specify the state when creating the flow in the callback so that it can
@@ -123,10 +117,8 @@ def oauth2callback():
 
 @app.route('/logout')
 def logout():
-  logout_user()
-  #flask.session.pop('credentials', None)
   flask.session.clear()
-  return redirect(url_for('login'))
+  return redirect(url_for('index'))
 
 
 def channels_list_by_username(client, **kwargs):
@@ -144,16 +136,17 @@ def search_list_by_keyword(client, **kwargs):
 		).execute()
 		return response
 
+
 def login_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        if 'logged_in' in session:
-            return f(*args,**kwargs)
+        if flask.session.logged_in:
+          	return f(*args,**kwargs)
         else:
             flash("Login Required")
-            return redirect(url_for('login'))
-            
+            return redirect(url_for('index'))
     return wrap
+
 
 if __name__ == '__main__':
   # When running locally, disable OAuthlib's HTTPs verification. When
