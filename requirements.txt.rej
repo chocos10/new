@@ -1,5 +1,0 @@
- Werkzeug==0.14.1
- pytz==2018.4
- simplejson==3.16.0
- Flask-Login
--Flask-SQLAlchemy

@@ -63,7 +63,7 @@ def result():
     					q=querry,
     					type='')
 	length = len(response['items'])
-	session.clear()
+	session.pop('querry' , None)
 	return render_template("results.html", response = response, length = length)
 
 @app.route('/authorize')
