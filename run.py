@@ -1,28 +1,40 @@
 # -*- coding: utf-8 -*-
 
 import os
+from functools import wraps
 
 import flask
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 
-# The CLIENT_SECRETS_FILE variable specifies the name of a file that contains
-# the OAuth 2.0 information for this application, including its client_id and
-# client_secret.
 CLIENT_SECRETS_FILE = "client_secret.json"
 
-# This OAuth 2.0 access scope allows for full read/write access to the
-# authenticated user's account and requires requests to use an SSL connection.
 SCOPES = ["https://www.googleapis.com/auth/youtube.force-ssl"]
 API_SERVICE_NAME = "youtube"
 API_VERSION = "v3"
 
 app = flask.Flask(__name__)
-# Note: A secret key is included in the sample so that it works, but if you
-# use this code in your application please replace this with a truly secret
-# key. See http://flask.pocoo.org/docs/0.12/quickstart/#sessions.
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "super secret app key")
+
+
+def login_required(f):
+    """
+        Decorator to check whether the user is logged in or not.
+    """
+
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if flask.session.get("logged_in"):
+            return f(*args, **kwargs)
+        else:
+            flask.flash("Login Required")
+            return flask.redirect(flask.url_for("authorize"))
+
+    return wrap
+
+
+""" Main application views """
 
 
 @app.route("/login")
@@ -41,6 +53,7 @@ def home():
 
 
 @app.route("/search", methods=["POST", "GET"])
+@login_required
 def search():
     if flask.request.method == "POST":
         flask.session["querry"] = flask.request.form["querry"]
@@ -49,17 +62,17 @@ def search():
 
 
 @app.route("/result")
+@login_required
 def result():
-    if "credentials" not in flask.session:
-        return flask.redirect("authorize")
-
-    # Load the credentials from the session.
+    # The user is already logged in here, load the credentials from the session.
     credentials = google.oauth2.credentials.Credentials(**flask.session["credentials"])
 
     client = googleapiclient.discovery.build(
         API_SERVICE_NAME, API_VERSION, credentials=credentials
     )
-    querry = flask.session["querry"]
+    querry = flask.session.get("querry")
+    if not querry:
+        return flask.redirect(flask.url_for("search"))
     response = search_list_by_keyword(
         client, part="snippet", maxResults=25, q=querry, type=""
     )
@@ -68,47 +81,36 @@ def result():
     return flask.render_template("results.html", response=response, length=length)
 
 
+""" Authentication related views using google oauth """
+
+
 @app.route("/authorize")
 def authorize():
-    # Create a flow instance to manage the OAuth 2.0 Authorization Grant Flow
-    # steps.
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         CLIENT_SECRETS_FILE, scopes=SCOPES
     )
 
     flow.redirect_uri = flask.url_for("oauth2callback", _external=True)
     authorization_url, state = flow.authorization_url(
-        # This parameter enables offline access which gives your application
-        # both an access and refresh token.
-        access_type="offline",
-        # This parameter enables incremental auth.
-        include_granted_scopes="true",
+        access_type="offline", include_granted_scopes="true"
     )
 
-    # Store the state in the session so that the callback can verify that
-    # the authorization server response.
     flask.session["state"] = state
     return flask.redirect(authorization_url)
 
 
 @app.route("/oauth2callback")
 def oauth2callback():
-    # Specify the state when creating the flow in the callback so that it can
-    # verify the authorization server response.
     state = flask.session["state"]
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         CLIENT_SECRETS_FILE, scopes=SCOPES, state=state
     )
     flow.redirect_uri = flask.url_for("oauth2callback", _external=True)
 
-    # Use the authorization server's response to fetch the OAuth 2.0 tokens.
     authorization_response = flask.request.url
     flow.fetch_token(authorization_response=authorization_response)
 
     # Store the credentials in the session.
-    # ACTION ITEM for developers:
-    #     Store user's access and refresh tokens in your data store if
-    #     incorporating this code into your real app.
     credentials = flow.credentials
     flask.session["credentials"] = {
         "token": credentials.token,
@@ -125,7 +127,11 @@ def oauth2callback():
 @app.route("/logout")
 def logout():
     flask.session.clear()
+    flask.flash("You are logged out, login to use the application")
     return flask.redirect(flask.url_for("index"))
+
+
+""" Utility methods used by the application views """
 
 
 def channels_list_by_username(client, **kwargs):
@@ -136,18 +142,6 @@ def channels_list_by_username(client, **kwargs):
 def search_list_by_keyword(client, **kwargs):
     response = client.search().list(**kwargs).execute()
     return response
-
-
-def login_required(f):
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        if flask.session.logged_in:
-            return f(*args, **kwargs)
-        else:
-            flask.flash("Login Required")
-            return flask.redirect(flask.url_for("index"))
-
-    return wrap
 
 
 if __name__ == "__main__":
