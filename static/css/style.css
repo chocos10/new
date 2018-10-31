@@ -10,3 +10,7 @@ body{
 iframe {
     padding: 10px;
 }
+
+.youtube-iframe-container {
+    display: inline-block;
+}
