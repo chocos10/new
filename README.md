@@ -1,7 +1,7 @@
-# youtube
+# youtubeapi
 
-It allows user to enter a search term in the UI and the resultant items are Searched and displayed using YouTube Data API v3.
-And the Returned results are sortable based on 2 params - eg. name and published date.
+It allows user to enter a search term in the UI and the resultant items are searched and displayed using YouTube Data API v3.
+The results are sortable based on 2 params name and published date.
 
 ### Requirements
 * Python 2.6 or greater.
@@ -44,7 +44,7 @@ And the Returned results are sortable based on 2 params - eg. name and published
 1.Make Virtual environment.
 
 ```
-$ python3 -m venv flask`
+$ python3 -m venv flask
 $ source flask/bin/activate
 ```
 
@@ -54,6 +54,7 @@ $ source flask/bin/activate
 $ pip install -r requirements.txt
 $ python3 run.py
 ```
+
 
 
 
